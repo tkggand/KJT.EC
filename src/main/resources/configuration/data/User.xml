@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<operation>
+    <dataCommand name="selectAll" database="AuthCenter" commandType="Text" timeout="7200">
+        <commandText>
+            SELECT * FROM `auth_center`.`user_info`
+            <where>
+                <if test="userId!=100">
+                    user_id>@userId
+                </if>
+            </where>
+            LIMIT 0,10;
+        </commandText>
+        <parameters>
+            <param name="@userId" dbType="String"/>
+        </parameters>
+    </dataCommand>
+</operation>
