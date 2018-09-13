@@ -22,6 +22,7 @@ public class AccountController {
     @RequestMapping
     public List<UserInfo> run(){
         List<UserInfo> list= mapper.selectAll(40231);
+        UserInfo userInfo=mapper.selectOne(41381);
         return list;
     }
 }

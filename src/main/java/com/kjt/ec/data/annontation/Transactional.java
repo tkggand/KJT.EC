@@ -6,4 +6,10 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Transactional {
+
+    int timeout() default -1;
+
+    int Isolation() default 2;
+
+    Class<? extends Throwable>[] rollbackFor() default {};
 }

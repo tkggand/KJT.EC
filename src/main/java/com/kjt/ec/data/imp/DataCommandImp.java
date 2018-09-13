@@ -1,6 +1,7 @@
 package com.kjt.ec.data.imp;
 
 import com.kjt.ec.data.DataCommand;
+import com.kjt.ec.data.annontation.Transactional;
 import com.kjt.ec.data.configuration.DataCommandSection;
 import com.kjt.ec.data.configuration.DatabaseSection;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
@@ -132,15 +133,23 @@ public class DataCommandImp implements DataCommand {
     }
 
     protected Connection prepareConnection(){
-        Connection connection=null;
+        Connection connection=ConnectionHolder.getConnection();
         try{
-            Map<String,String> datasource=database.getDatasource();
-            String driver=datasource.get("driver");
-            String url=datasource.get("url");
-            String username=datasource.get("username");
-            String password=datasource.get("password");
-            Class.forName(driver);
-            connection=DriverManager.getConnection(url,username,password);
+            if(connection==null){
+                Map<String,String> datasource=database.getDatasource();
+                String driver=datasource.get("driver");
+                String url=datasource.get("url");
+                String username=datasource.get("username");
+                String password=datasource.get("password");
+                Class.forName(driver);
+                connection=DriverManager.getConnection(url,username,password);
+                ConnectionHolder.setConnection(connection);
+            }
+            Transactional transactional=ConnectionHolder.getTransactional();
+            if(transactional!=null&&connection.getAutoCommit()){
+                connection.setAutoCommit(false);
+                connection.setTransactionIsolation(transactional.Isolation());
+            }
         }catch (Exception e){
             e.printStackTrace();
         }

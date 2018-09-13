@@ -8,4 +8,6 @@ import java.util.List;
 @Mapper
 public interface UserMapper {
     List<UserInfo> selectAll(@Param("userId") int userId);
+
+    UserInfo selectOne(@Param("userId") int userId);
 }
