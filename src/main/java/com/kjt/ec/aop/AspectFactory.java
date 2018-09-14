@@ -3,9 +3,11 @@ package com.kjt.ec.aop;
 import com.kjt.ec.aop.advice.AfterAdvice;
 import com.kjt.ec.aop.advice.AroundAdivice;
 import com.kjt.ec.aop.advice.BeforeAdvice;
+import com.kjt.ec.aop.advice.ThrowingAdvice;
 import com.kjt.ec.aop.annontation.After;
 import com.kjt.ec.aop.annontation.Around;
 import com.kjt.ec.aop.annontation.Before;
+import com.kjt.ec.aop.annontation.Throwing;
 import com.kjt.ec.aop.interceptor.AspectInterceptor;
 import com.kjt.ec.ioc.bean.BeanFactory;
 
@@ -20,6 +22,8 @@ public class AspectFactory {
             return new BeforeAdvice(factory,classType, method);
         } else if (annontationType == After.class) {
             return new AfterAdvice(factory,classType, method);
+        }else if (annontationType == Throwing.class) {
+            return new ThrowingAdvice(factory,classType, method);
         }
         return null;
     }

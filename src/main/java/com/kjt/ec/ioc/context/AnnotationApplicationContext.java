@@ -1,26 +1,19 @@
-package com.kjt.ec.ioc.bean;
+package com.kjt.ec.ioc.context;
 
-import com.kjt.ec.aop.GenerateProxy;
-import com.kjt.ec.aop.annontation.Aspect;
-import com.kjt.ec.data.imp.MapperProxy;
 import com.kjt.ec.data.annontation.Mapper;
-import com.kjt.ec.extension.BeanExtension;
-import com.kjt.ec.ioc.annontation.Autowired;
+import com.kjt.ec.data.imp.MapperProxy;
+import com.kjt.ec.ioc.bean.*;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DefaultBeanFactory implements BeanFactory {
-
-    final List<Class> aspectList=new ArrayList<Class>();
+@SuppressWarnings("unused")
+public class AnnotationApplicationContext extends AbstractApplicationContext {
     final Map<String,BeanDefinition> definitions;
     final Map<String,Object> instanceMap=new ConcurrentHashMap<String, Object>();
 
-    public DefaultBeanFactory(){
+    public AnnotationApplicationContext(){
         definitions= BeanScanner.scanBean(aspectList);
     }
 
@@ -74,6 +67,7 @@ public class DefaultBeanFactory implements BeanFactory {
                 }
                 if(instance!=null){
                     this.autowiredBean(instance,classType);
+                    this.postBeanFactory(instance,classType);
                     return this.createProxy(instance,classType);
                 }
             }else {
@@ -86,33 +80,5 @@ public class DefaultBeanFactory implements BeanFactory {
             e.printStackTrace();
         }
         return instance;
-    }
-
-    private Object createProxy(Object instance, Class impType) {
-        if(impType!=null&&impType.isAnnotationPresent(Aspect.class)){
-            return instance;
-        }
-        return GenerateProxy.newProxyInstance(this,instance,impType,aspectList);
-    }
-
-    private void autowiredBean(Object instance,Class classType){
-        try{
-            Field[] fields=classType.getDeclaredFields();
-            for (Field field:fields){
-                if(!field.isAnnotationPresent(Autowired.class)){
-                    continue;
-                }
-                String beanName= BeanExtension.getServiceName(field);
-                Object value=this.getBean(beanName);
-                field.setAccessible(true);
-                field.set(instance,value);
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    protected String buildBeanName(Class classType){
-        return classType.getName();
     }
 }

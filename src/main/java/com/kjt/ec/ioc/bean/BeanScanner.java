@@ -6,6 +6,7 @@ import com.kjt.ec.extension.BeanExtension;
 import com.kjt.ec.ioc.annontation.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +19,7 @@ public class BeanScanner {
         List<Class> allClass = PackageScanner.loadClassFromPackage(basePackage);
         aspectList.addAll(scanAspect(allClass));
         for (Class classType:allClass) {
-            Class[] interfaces = classType.getInterfaces();
+            Class[] interfaces =BeanExtension.getInterfaces(classType);
             if (classType.isInterface()) {
                 String beanName = BeanExtension.getBeanName(classType);
                 BeanDefinition definition = new BeanDefinition(classType,null);

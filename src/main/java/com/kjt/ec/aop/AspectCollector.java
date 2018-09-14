@@ -1,8 +1,6 @@
 package com.kjt.ec.aop;
 
-import com.kjt.ec.aop.annontation.After;
-import com.kjt.ec.aop.annontation.Around;
-import com.kjt.ec.aop.annontation.Before;
+import com.kjt.ec.aop.annontation.*;
 import com.kjt.ec.aop.interceptor.AspectInterceptor;
 import com.kjt.ec.aop.selector.PointcutSelector;
 import com.kjt.ec.ioc.bean.BeanFactory;
@@ -22,24 +20,63 @@ public class AspectCollector {
             result=new ArrayList<AspectInterceptor>();
             for (Class aspect:aspectList){
                 Method[] methods= aspect.getDeclaredMethods();
+                Method pointCutMethod=getPointCutMethod(methods);
+                PointcutSelector pointcut=null;
+                if(pointCutMethod!=null){
+                    PointCut annon=pointCutMethod.getAnnotation(PointCut.class);
+                    pointcut=new PointcutSelector(annon.value());
+                }
                 for (Method mh:methods){
+                    if(mh.isAnnotationPresent(PointCut.class)){
+                        continue;
+                    }
                     if(mh.isAnnotationPresent(Before.class)){
                         Before around=mh.getAnnotation(Before.class);
-                        PointcutSelector selector=new PointcutSelector(around.value());
-                        if(selector.isValidForAdvisor(method)){
+                        if(pointcut!=null&&
+                            around.value().startsWith(pointCutMethod.getName())&&
+                            pointcut.isValidForAdvisor(method)){
                             result.add(AspectFactory.create(factory,aspect,mh,Before.class));
+                        }else {
+                            PointcutSelector selector=new PointcutSelector(around.value());
+                            if(selector.isValidForAdvisor(method)){
+                                result.add(AspectFactory.create(factory,aspect,mh,Before.class));
+                            }
                         }
                     }else if(mh.isAnnotationPresent(After.class)){
                         After around=mh.getAnnotation(After.class);
-                        PointcutSelector selector=new PointcutSelector(around.value());
-                        if(selector.isValidForAdvisor(method)){
+                        if(pointcut!=null&&
+                                around.value().startsWith(pointCutMethod.getName())&&
+                                pointcut.isValidForAdvisor(method)){
                             result.add(AspectFactory.create(factory,aspect,mh,After.class));
+                        }else {
+                            PointcutSelector selector=new PointcutSelector(around.value());
+                            if(selector.isValidForAdvisor(method)){
+                                result.add(AspectFactory.create(factory,aspect,mh,After.class));
+                            }
                         }
                     }else if(mh.isAnnotationPresent(Around.class)){
                         Around around=mh.getAnnotation(Around.class);
-                        PointcutSelector selector=new PointcutSelector(around.value());
-                        if(selector.isValidForAdvisor(method)){
+                        if(pointcut!=null&&
+                                around.value().startsWith(pointCutMethod.getName())&&
+                                pointcut.isValidForAdvisor(method)){
                             result.add(AspectFactory.create(factory,aspect,mh,Around.class));
+                        }else {
+                            PointcutSelector selector=new PointcutSelector(around.value());
+                            if(selector.isValidForAdvisor(method)){
+                                result.add(AspectFactory.create(factory,aspect,mh,Around.class));
+                            }
+                        }
+                    }else if(mh.isAnnotationPresent(Throwing.class)){
+                        Throwing around=mh.getAnnotation(Throwing.class);
+                        if(pointcut!=null&&
+                                around.value().startsWith(pointCutMethod.getName())&&
+                                pointcut.isValidForAdvisor(method)){
+                            result.add(AspectFactory.create(factory,aspect,mh,Throwing.class));
+                        }else {
+                            PointcutSelector selector=new PointcutSelector(around.value());
+                            if(selector.isValidForAdvisor(method)){
+                                result.add(AspectFactory.create(factory,aspect,mh,Throwing.class));
+                            }
                         }
                     }
                 }
@@ -47,5 +84,14 @@ public class AspectCollector {
             aspectInterceptors.put(method,result);
         }
         return result;
+    }
+
+    private static Method getPointCutMethod(Method[] methods){
+        for (Method mh:methods){
+            if(mh.isAnnotationPresent(PointCut.class)){
+                return mh;
+            }
+        }
+        return null;
     }
 }

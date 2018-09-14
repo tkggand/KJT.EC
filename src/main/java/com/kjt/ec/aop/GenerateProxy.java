@@ -3,9 +3,12 @@ package com.kjt.ec.aop;
 import com.kjt.ec.aop.advice.AfterAdvice;
 import com.kjt.ec.aop.advice.AroundAdivice;
 import com.kjt.ec.aop.advice.BeforeAdvice;
+import com.kjt.ec.aop.advice.ThrowingAdvice;
 import com.kjt.ec.aop.annontation.Around;
+import com.kjt.ec.aop.annontation.Throwing;
 import com.kjt.ec.aop.interceptor.AspectInterceptor;
 import com.kjt.ec.aop.selector.PointcutSelector;
+import com.kjt.ec.extension.BeanExtension;
 import com.kjt.ec.ioc.bean.BeanFactory;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -32,7 +35,7 @@ public class GenerateProxy implements InvocationHandler,MethodInterceptor {
     public static Object newProxyInstance(BeanFactory factory,Object instance, Class classType,List<Class> aspectList){
         GenerateProxy proxy=new GenerateProxy(factory,instance,classType,aspectList);
         ClassLoader classloader=classType.getClassLoader();
-        Class[] interfaceList=classType.getInterfaces();
+        Class[] interfaceList= BeanExtension.getInterfaces(classType);
         if(classType.isInterface()||(interfaceList!=null&&interfaceList.length>0)) {
             if (interfaceList == null || interfaceList.length == 0) {
                 return Proxy.newProxyInstance(classloader, new Class[]{classType}, proxy);
@@ -69,9 +72,17 @@ public class GenerateProxy implements InvocationHandler,MethodInterceptor {
                 }
             }
             point.process();
-            for (AspectInterceptor interceptor : interceptors) {
-                if (interceptor instanceof AfterAdvice) {
-                    interceptor.interceptor(point);
+            if(point.getException()!=null){
+                for (AspectInterceptor interceptor : interceptors) {
+                    if (interceptor instanceof ThrowingAdvice) {
+                        interceptor.interceptor(point);
+                    }
+                }
+            }else {
+                for (AspectInterceptor interceptor : interceptors) {
+                    if (interceptor instanceof AfterAdvice) {
+                        interceptor.interceptor(point);
+                    }
                 }
             }
         }
