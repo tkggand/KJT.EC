@@ -9,7 +9,6 @@ import com.kjt.ec.ioc.annontation.Service;
 @SuppressWarnings("unused")
 public class RequestInterceptor {
 
-    //@PointCut("@target(com.kjt.ec.demo.RequestMapping)")
     @PointCut("@annotation(com.kjt.ec.demo.RequestMapping)")
     public void pointcut(){
 
